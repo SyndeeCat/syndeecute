@@ -23,10 +23,6 @@ fn draw_executor(application: &Application) {
     // whether the completions should be presented in a popup window
     completion_countries.set_popup_completion(true);
 
-    // Create a ListStore of items
-    // These will be the source for the autocompletion
-    // as the user types into the field
-    // For a more evolved example of ListStore see src/bin/list_store.rs
     let ls = create_list_model();
     completion_countries.set_model(Some(&ls));
 
@@ -52,33 +48,47 @@ fn main() {
         draw_executor(app);
     });
 
-
     application.run();
 }
 
-
 struct Data {
+    name: String,
+    exec: String,
     description: String,
 }
 
 fn create_list_model() -> gtk::ListStore {
-    let col_types: [glib::Type; 1] = [glib::Type::STRING];
+    let col_types: [glib::Type; 3] = [glib::Type::STRING; 3];
 
-
-
-    let a = gio::AppInfo::all().iter().map(|a| format!("{}", a.name())).collect::<Vec<String>>();
-    
+    let a = gio::AppInfo::all()
+        .iter()
+        .map(|a| {
+            (
+                format!("{}", a.name()),
+                format!(
+                    "{}",
+                    match a.description() {
+                        Some(d) => d,
+                        None => "No description.".into(),
+                    }
+                ),
+                format!("{}", a.executable().to_str().unwrap()),
+            )
+        })
+        .collect::<Vec<(String, String, String)>>();
 
     let mut data: Vec<Data> = Vec::new();
     for n in a {
-        data.push(Data {description: n });
+        data.push(Data {
+            name: n.0,
+            description: n.1,
+            exec: n.2,
+        });
     }
-    // for command in String::from_utf8(a.stdout).unwrap().split("\n") {
-    //     data.push(Data { description : command.to_string() });
-    // }
+
     let store = gtk::ListStore::new(&col_types);
     for d in data.iter() {
-        let values: [(u32, &dyn ToValue); 1] = [(0, &d.description)];
+        let values: [(u32, &dyn ToValue); 3] = [(0, &d.name), (1, &d.description), (2, &d.exec)];
         store.set(&store.append(), &values);
     }
     store
