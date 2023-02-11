@@ -1,11 +1,15 @@
 use gtk::{prelude::*, Application, ApplicationWindow};
+
+
+const WINDOW_DIMENTIONS: (i32, i32) = (750, 50);
+
 fn draw_executor(application: &Application) {
     let window = ApplicationWindow::new(application);
 
     window.set_title("");
 
     window.set_position(gtk::WindowPosition::Center);
-    window.set_default_size(750, 500);
+    window.set_default_size(WINDOW_DIMENTIONS.0, WINDOW_DIMENTIONS.1);
     window.set_border_width(3);
 
     window.set_resizable(false);
