@@ -1,5 +1,4 @@
 use gtk::{prelude::*, Application, ApplicationWindow};
-
 fn draw_executor(application: &Application) {
     let window = ApplicationWindow::new(application);
 
@@ -53,6 +52,7 @@ fn main() {
         draw_executor(app);
     });
 
+
     application.run();
 }
 
@@ -65,13 +65,17 @@ fn create_list_model() -> gtk::ListStore {
     let col_types: [glib::Type; 1] = [glib::Type::STRING];
 
 
-    let a = std::process::Command::new("bash").arg("./get_all_progs.sh").output().expect("OMG!");
+
+    let a = gio::AppInfo::all().iter().map(|a| format!("{}", a.name())).collect::<Vec<String>>();
     
 
     let mut data: Vec<Data> = Vec::new();
-    for command in String::from_utf8(a.stdout).unwrap().split("\n") {
-        data.push(Data { description : command.to_string() });
+    for n in a {
+        data.push(Data {description: n });
     }
+    // for command in String::from_utf8(a.stdout).unwrap().split("\n") {
+    //     data.push(Data { description : command.to_string() });
+    // }
     let store = gtk::ListStore::new(&col_types);
     for d in data.iter() {
         let values: [(u32, &dyn ToValue); 1] = [(0, &d.description)];
