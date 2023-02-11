@@ -12,7 +12,7 @@ fn draw_executor(application: &Application) {
     window.set_keep_above(true);
 
     let win_title = gtk::Label::new(None);
-    win_title.set_markup("<big>Write a programm name</big>");
+    win_title.set_markup("<big>Write a program name</big>");
 
     // Create an EntryCompletion widget
     let completion_countries = gtk::EntryCompletion::new();
