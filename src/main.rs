@@ -1,5 +1,6 @@
-use gtk::{prelude::*, Application, ApplicationWindow};
-
+use gtk::prelude::*;
+use gtk::{cairo, gdk};
+use gtk::{Application, ApplicationWindow};
 
 const WINDOW_DIMENTIONS: (i32, i32) = (750, 50);
 
@@ -14,18 +15,21 @@ fn draw_executor(application: &Application) {
 
     window.set_resizable(false);
     window.set_keep_above(true);
+    window.set_app_paintable(true);
+
+    window.connect_screen_changed(set_visual);
+    window.connect_draw(draw);
 
     let win_title = gtk::Label::new(None);
-    win_title.set_markup("<big>Write a program name</big>");
+    win_title.set_markup("<span foreground=\"white\"><big>Write a program name</big></span>");
 
-    // Create an EntryCompletion widget
     let completion_countries = gtk::EntryCompletion::new();
-    // Use the first (and only) column available to set the autocompletion text
     completion_countries.set_text_column(0);
-    // how many keystrokes to wait before attempting to autocomplete?
-    completion_countries.set_minimum_key_length(1);
-    // whether the completions should be presented in a popup window
+    completion_countries.set_minimum_key_length(2);
     completion_countries.set_popup_completion(true);
+    completion_countries.set_popup_set_width(true);
+    completion_countries.set_inline_completion(true);
+    completion_countries.set_inline_selection(true);
 
     let ls = create_list_model();
     completion_countries.set_model(Some(&ls));
@@ -96,4 +100,19 @@ fn create_list_model() -> gtk::ListStore {
         store.set(&store.append(), &values);
     }
     store
+}
+
+fn set_visual(window: &ApplicationWindow, _screen: Option<&gdk::Screen>) {
+    if let Some(screen) = GtkWindowExt::screen(window) {
+        if let Some(ref visual) = screen.rgba_visual() {
+            window.set_visual(Some(visual));
+        }
+    }
+}
+
+fn draw(_window: &ApplicationWindow, ctx: &cairo::Context) -> Inhibit {
+    ctx.set_source_rgba(0.1, 0.1, 0.1, 0.85); // almost black + light transparency
+    ctx.set_operator(cairo::Operator::Screen);
+    ctx.paint().expect("Invalid cairo surface state");
+    Inhibit(false)
 }
