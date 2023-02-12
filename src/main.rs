@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use gtk::prelude::*;
 use gtk::{cairo, gdk};
 use gtk::{Application, ApplicationWindow};
@@ -55,6 +57,28 @@ fn draw_executor(application: &Application) {
 
     let input_field = gtk::Entry::new();
     input_field.set_completion(Some(&completion_countries));
+    input_field.connect_activate(move |l| {
+        let a = gio::AppInfo::all()
+        .iter()
+        .map(|a| {
+            (
+                format!("{}", a.name()),
+                format!("{}", a.executable().to_str().unwrap()),
+            )
+        })
+        .collect::<Vec<(String, String)>>();
+        for exec in a.iter() {
+            if exec.0 == l.text() {
+                println!("{}", exec.1);
+                let command_path = &(exec.1).replace("\"", "");
+
+
+                Command::new("sh").arg(command_path).spawn().unwrap();
+                std::process::exit(0);
+            }
+        }
+    });
+    // input_field.set_activates_default(true);
 
     let row = gtk::Box::new(gtk::Orientation::Vertical, 5);
     row.add(&win_title);
