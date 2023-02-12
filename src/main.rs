@@ -72,8 +72,14 @@ fn draw_executor(application: &Application) {
                 println!("{}", exec.1);
                 let command_path = &(exec.1).replace("\"", "");
 
+                for ch in command_path.split(".") {
+                    if ch == "sh" {
+                        Command::new("sh").arg(command_path).spawn().unwrap();
+                    } else {
+                        Command::new(command_path).spawn().unwrap();
+                    }
+                }
 
-                Command::new("sh").arg(command_path).spawn().unwrap();
                 std::process::exit(0);
             }
         }
