@@ -20,28 +20,24 @@ fn draw_executor(application: &Application) {
     window.connect_screen_changed(set_visual);
     window.connect_draw(draw);
 
-    window
-        .connect("key_press_event", true, |values| {
-            // "values" is a 2-long slice of glib::value::Value, which wrap G-types
-            // You can unwrap them if you know what type they are going to be ahead of time
-            // values[0] is the window and values[1] is the event
-            let raw_event = &values[1].get::<gdk::Event>().unwrap();
-            // You have to cast to the correct event type to access some of the fields
-            match raw_event.downcast_ref::<gdk::EventKey>() {
-                Some(event) => {
-                    println!("key value: {:?}", *(std::char::from_u32(event.keyval())));
-                    println!("modifiers: {:?}", event.state());
+    window.connect("key_press_event", true, |values| {
+        let raw_event = &values[1].get::<gdk::Event>().unwrap();
+        match raw_event.downcast_ref::<gdk::EventKey>() {
+            Some(event) => {
+                let pressed = event.keyval();
+                if let Some(k) = pressed.name() {
+                    if k == "Escape" {
+                        std::process::exit(0);
+                    } /* else {
+                          println!("key value: {:?}", k);
+                      } */
                 }
-                None => {}
+                /* println!("modifiers: {:?}", event.state()); */
             }
-
-            // You need to return Some() of a glib Value wrapping a bool
-            let result = glib::value::Value::from_type(glib::types::Type);
-            // I can't figure out how to actually set the value of result
-            // Luckally returning false is good enough for now.
-            Some(result)
-        })
-        .unwrap();
+            None => {}
+        }
+        Some((true).to_value())
+    });
 
     let win_title = gtk::Label::new(None);
     win_title.set_markup("<span foreground=\"white\"><big>Write a program name</big></span>");
